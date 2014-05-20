@@ -37,6 +37,19 @@ ApplicationWindow {
         }
     }
 
+    toolBar: ToolBar {
+        RowLayout {
+            ToolButton {
+                text: qsTr("Reset statistics")
+                onClicked: resetStatistics()
+            }
+            ToolButton {
+                text: qsTr("Exit")
+                onClicked: Qt.quit();
+            }
+        }
+    }
+
     property int winCount: 0;
     property int lossCount: 0;
     property int drawCount: 0;
