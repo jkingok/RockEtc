@@ -1,5 +1,6 @@
 import QtQuick 2.2
-import QtQuick.Controls 1.1
+import QtQuick.Controls 1.2
+import QtQuick.Layouts 1.1
 import QtQuick.LocalStorage 2.0
 
 ApplicationWindow {
@@ -18,6 +19,20 @@ ApplicationWindow {
             MenuItem {
                 text: qsTr("Exit")
                 onTriggered: Qt.quit();
+            }
+        }
+    }
+
+    statusBar: StatusBar {
+        RowLayout {
+            Label {
+                id: status
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                text: "Player make your choice"
+                verticalAlignment: Text.AlignVCenter
+                //horizontalAlignment: Text.AlignHCenter
             }
         }
     }
@@ -171,27 +186,9 @@ ApplicationWindow {
             onAccepted: myStates.state = ''
         } */
 
-        Rectangle {
-            id: statusrect
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: status.height
-            color: "#ffffff"
-            Label {
-                id: status
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                text: "Player make your choice"
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-            }
-        }
-
         Row {
             id: row1
-            anchors.top: statusrect.bottom
+            anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: stats.bottom
@@ -486,11 +483,6 @@ ApplicationWindow {
                 }
 
                 PropertyChanges {
-                    target: statusrect
-                    color: "#66ff66"
-                }
-
-                PropertyChanges {
                     target: status
                     text: "You win!"
                 }
@@ -536,11 +528,6 @@ ApplicationWindow {
                 PropertyChanges {
                     target: myrect
                     color: "#66ff66"
-                }
-
-                PropertyChanges {
-                    target: statusrect
-                    color: "#ff6666"
                 }
 
                 PropertyChanges {
@@ -592,11 +579,6 @@ ApplicationWindow {
                 }
 
                 PropertyChanges {
-                    target: statusrect
-                    color: "#6666ff"
-                }
-
-                PropertyChanges {
                     target: status
                     text: "It's a draw."
                 }
@@ -635,10 +617,6 @@ ApplicationWindow {
         transitions: [
             Transition {
                 to: "*"
-                ColorAnimation {
-                    target: statusrect
-                    duration: 1000
-                }
                 ColorAnimation {
                     target: yourrect
                     duration: 1000
