@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.1
+import QtQuick.LocalStorage 2.0
 
 ApplicationWindow {
     visible: true
@@ -11,6 +12,10 @@ ApplicationWindow {
         Menu {
             title: qsTr("App")
             MenuItem {
+                text: qsTr("Reset statistics")
+                onTriggered: resetStatistics()
+            }
+            MenuItem {
                 text: qsTr("Exit")
                 onTriggered: Qt.quit();
             }
@@ -21,6 +26,53 @@ ApplicationWindow {
     property int lossCount: 0;
     property int drawCount: 0;
     property int gamesPlayed: 0;
+
+    function resetStatistics() {
+        gamesPlayed = 0
+        winCount = 0
+        lossCount = 0
+        drawCount = 0
+    }
+
+    function loadState() {
+        var db = LocalStorage.openDatabaseSync("RockEtc", "1.0", "Statistics of RockEtc", 1024,
+                                  function (newdb) {
+                                      newdb.transaction(
+                                                  function(tx){
+                                                      tx.executeSql('CREATE TABLE IF NOT EXISTS Statistics(winCount NUMBER, lossCount NUMBER, drawCount NUMBER, gamesPlayed NUMBER)');
+                                                  })
+                                  }
+                                      );
+        db.readTransaction(
+                    function (tx) {
+                        var rs = tx.executeSql("SELECT * FROM Statistics")
+                        if (rs.rows.length > 0) {
+                            winCount = rs.rows.item(0).winCount;
+                            lossCount = rs.rows.item(0).lossCount;
+                            drawCount = rs.rows.item(0).drawCount;
+                            gamesPlayed = rs.rows.item(0).gamesPlayed;
+                        }
+                    }
+                    )
+    }
+
+    Component.onCompleted: loadState()
+
+    Component.onDestruction: saveState()
+
+    function saveState() {
+        var db = LocalStorage.openDatabaseSync("RockEtc", "1.0", "Statistics of RockEtc", 1024);
+        db.transaction(
+                    function(tx){
+                        //tx.executeSql('CREATE TABLE IF NOT EXISTS Statistics(winCount NUMBER, lossCount NUMBER, drawCount NUMBER, gamesPlayed NUMBER)');
+                        //var rs = tx.executeSql('SELECT COUNT(*) AS rowCount FROM Statistics')
+                        //if (rs.rows.item(0).rowCount > 0)
+                        //    tx.executeSql('UPDATE TABLE Statistics SET winCount=?, lossCount=?, drawCount=?, gamesPlayed=?', [winCount, lossCount, drawCount, gamesPlayed])
+                        //else
+                            tx.executeSql('INSERT OR REPLACE INTO Statistics VALUES(?, ?, ?, ?)', [winCount, lossCount, drawCount, gamesPlayed])
+                    }
+                        )
+    }
 
     function chosen(number) {
             var you = number;
