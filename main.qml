@@ -69,6 +69,7 @@ ApplicationWindow {
                                                   function(tx){
                                                       tx.executeSql('CREATE TABLE IF NOT EXISTS Statistics(winCount NUMBER, lossCount NUMBER, drawCount NUMBER, gamesPlayed NUMBER)');
                                                   })
+                                      newdb.changeVersion("", "1.0")
                                   }
                                       );
         db.readTransaction(
