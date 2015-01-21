@@ -1,9 +1,12 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.3
 import QtQuick.Layouts 1.1
-import QtQuick.LocalStorage 2.0
+//import QtQuick.LocalStorage 2.0
+
+import Qt.labs.settings 1.0
 
 ApplicationWindow {
+    id: root
     visible: true
     width: 640
     height: 480
@@ -56,6 +59,13 @@ ApplicationWindow {
     property int drawCount: 0;
     property int gamesPlayed: 0;
 
+    Settings {
+        property alias wins: root.winCount
+        property alias losses: root.lossCount
+        property alias draws: root.drawCount
+        property alias games: root.gamesPlayed
+    }
+
     function resetStatistics() {
         gamesPlayed = 0
         winCount = 0
@@ -64,26 +74,26 @@ ApplicationWindow {
     }
 
     function loadState() {
-        var db = LocalStorage.openDatabaseSync("RockEtc", "1.0", "Statistics of RockEtc", 1024,
-                                               function (newdb) {
-                                                   newdb.transaction(
-                                                               function(tx){
-                                                                   tx.executeSql('CREATE TABLE IF NOT EXISTS Statistics(winCount NUMBER, lossCount NUMBER, drawCount NUMBER, gamesPlayed NUMBER)');
-                                                               })
-                                                   newdb.changeVersion("", "1.0")
-                                               }
-                                               );
-        db.readTransaction(
-                    function (tx) {
-                        var rs = tx.executeSql("SELECT * FROM Statistics")
-                        if (rs.rows.length > 0) {
-                            winCount = rs.rows.item(0).winCount;
-                            lossCount = rs.rows.item(0).lossCount;
-                            drawCount = rs.rows.item(0).drawCount;
-                            gamesPlayed = rs.rows.item(0).gamesPlayed;
-                        }
-                    }
-                    )
+//        var db = LocalStorage.openDatabaseSync("RockEtc", "1.0", "Statistics of RockEtc", 1024,
+//                                               function (newdb) {
+//                                                   newdb.transaction(
+//                                                               function(tx){
+//                                                                   tx.executeSql('CREATE TABLE IF NOT EXISTS Statistics(winCount NUMBER, lossCount NUMBER, drawCount NUMBER, gamesPlayed NUMBER)');
+//                                                               })
+//                                                   newdb.changeVersion("", "1.0")
+//                                               }
+//                                               );
+//        db.readTransaction(
+//                    function (tx) {
+//                        var rs = tx.executeSql("SELECT * FROM Statistics")
+//                        if (rs.rows.length > 0) {
+//                            winCount = rs.rows.item(0).winCount;
+//                            lossCount = rs.rows.item(0).lossCount;
+//                            drawCount = rs.rows.item(0).drawCount;
+//                            gamesPlayed = rs.rows.item(0).gamesPlayed;
+//                        }
+//                    }
+//                    )
 
         // We also disable the menu bar on winrt
         if (Qt.platform.os !== "winrt")
@@ -95,17 +105,17 @@ ApplicationWindow {
     Component.onDestruction: saveState()
 
     function saveState() {
-        var db = LocalStorage.openDatabaseSync("RockEtc", "1.0", "Statistics of RockEtc", 1024);
-        db.transaction(
-                    function(tx){
-                        //tx.executeSql('CREATE TABLE IF NOT EXISTS Statistics(winCount NUMBER, lossCount NUMBER, drawCount NUMBER, gamesPlayed NUMBER)');
-                        //var rs = tx.executeSql('SELECT COUNT(*) AS rowCount FROM Statistics')
-                        //if (rs.rows.item(0).rowCount > 0)
-                        //    tx.executeSql('UPDATE TABLE Statistics SET winCount=?, lossCount=?, drawCount=?, gamesPlayed=?', [winCount, lossCount, drawCount, gamesPlayed])
-                        //else
-                        tx.executeSql('INSERT OR REPLACE INTO Statistics VALUES(?, ?, ?, ?)', [winCount, lossCount, drawCount, gamesPlayed])
-                    }
-                    )
+//        var db = LocalStorage.openDatabaseSync("RockEtc", "1.0", "Statistics of RockEtc", 1024);
+//        db.transaction(
+//                    function(tx){
+//                        //tx.executeSql('CREATE TABLE IF NOT EXISTS Statistics(winCount NUMBER, lossCount NUMBER, drawCount NUMBER, gamesPlayed NUMBER)');
+//                        //var rs = tx.executeSql('SELECT COUNT(*) AS rowCount FROM Statistics')
+//                        //if (rs.rows.item(0).rowCount > 0)
+//                        //    tx.executeSql('UPDATE TABLE Statistics SET winCount=?, lossCount=?, drawCount=?, gamesPlayed=?', [winCount, lossCount, drawCount, gamesPlayed])
+//                        //else
+//                        tx.executeSql('INSERT OR REPLACE INTO Statistics VALUES(?, ?, ?, ?)', [winCount, lossCount, drawCount, gamesPlayed])
+//                    }
+//                    )
     }
 
     function chosen(number) {
@@ -114,24 +124,24 @@ ApplicationWindow {
         var newstate;
         switch (you) {
         case 0:
-            yourchoice.source = "rock.svg"
+            yourchoice.source = "qrc:/rock.svg"
             break;
         case 1:
-            yourchoice.source = "scissors.svg"
+            yourchoice.source = "qrc:/scissors.svg"
             break;
         case 2:
-            yourchoice.source = "paper.svg"
+            yourchoice.source = "qrc:/paper.svg"
             break;
         }
         switch (me) {
         case 0:
-            mychoice.source = "rock.svg"
+            mychoice.source = "qrc:/rock.svg"
             break;
         case 1:
-            mychoice.source = "scissors.svg"
+            mychoice.source = "qrc:/scissors.svg"
             break;
         case 2:
-            mychoice.source = "paper.svg"
+            mychoice.source = "qrc:/paper.svg"
             break;
         }
         if (you === me) {
@@ -213,7 +223,7 @@ ApplicationWindow {
         anchors.bottom: stats.bottom
         Column {
             id: column1
-            width: parent.width / 4
+            width: myStates.state === "" ? parent.width / 4 : 0
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             //opacity: myStates.state == "" ? 1.0 : 0.0
@@ -223,80 +233,78 @@ ApplicationWindow {
                 horizontalAlignment: Text.AlignLeft
             }
 
-            Rectangle {
-                id: rockrect
-                radius: 8
-                color: "yellow"
+            Behavior on width {
+                NumberAnimation { duration: 500 }
+            }
+
+            Button {
+                id: yourrock
+                //radius: 8
+                //color: "yellow"
                 anchors.margins: 4
                 anchors.right: parent.right
                 anchors.left: parent.left
                 height: parent.height / 3 - playerlabel.height
                 opacity: 1.0
 
-                Image {
-                    id: yourrock
-                    //height: parent.height / 3 - playerlabel.height
-                    //anchors.right: parent.right
-                    //anchors.left: parent.left
-                    anchors.fill: parent
-                    anchors.margins: 4
-                    fillMode: Image.PreserveAspectFit
-                    source: "rock.svg"
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: if (myStates.state === "") myStates.state = chosen(0)
+                iconSource: "qrc:/rock.svg"
+                text: "Rock"
+                onClicked: if (myStates.state === "") myStates.state = chosen(0)
+
+                onHoveredChanged: {
+                    if (hovered) {
+                        yourchoice.source = "qrc:/rock.svg"
+                        yourchoice.opacity = 1
+                    } else {
+                        yourchoice.opacity = 0
                     }
                 }
             }
 
-            Rectangle {
-                id: scissorsrect
-                radius: 8
-                color: "yellow"
+            Button {
+                id: yourscissors
+                //radius: 8
+                //color: "yellow"
                 anchors.margins: 4
                 anchors.right: parent.right
                 anchors.left: parent.left
                 height: parent.height / 3 - playerlabel.height
                 opacity: 1.0
 
-                Image {
-                    id: yourscissors
-                    //height: parent.height / 3 - playerlabel.height
-                    //anchors.right: parent.right
-                    //anchors.left: parent.left
-                    anchors.fill: parent
-                    anchors.margins: 4
-                    fillMode: Image.PreserveAspectFit
-                    source: "scissors.svg"
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: if (myStates.state === "") myStates.state = chosen(1)
+                iconSource: "qrc:/scissors.svg"
+                text: "Scissors"
+                onClicked: if (myStates.state === "") myStates.state = chosen(1)
+
+                onHoveredChanged: {
+                    if (hovered) {
+                        yourchoice.source = "qrc:/scissors.svg"
+                        yourchoice.opacity = 1
+                    } else {
+                        yourchoice.opacity = 0
                     }
                 }
             }
 
-            Rectangle {
-                id: paperrect
-                radius: 8
-                color: "yellow"
+            Button {
+                id: yourpaper
+                //radius: 8
+                //color: "yellow"
                 anchors.margins: 4
                 anchors.right: parent.right
                 anchors.left: parent.left
                 height: parent.height / 3 - playerlabel.height
                 opacity: 1.0
 
-                Image {
-                    id: yourpaper
-                    //height: parent.height / 3 - playerlabel.height
-                    //anchors.right: parent.right
-                    //anchors.left: parent.left
-                    anchors.fill: parent
-                    anchors.margins: 4
-                    fillMode: Image.PreserveAspectFit
-                    source: "paper.svg"
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: if (myStates.state === "") myStates.state = chosen(2)
+                iconSource: "qrc:/paper.svg"
+                text: "Paper"
+                onClicked: if (myStates.state === "") myStates.state = chosen(2)
+
+                onHoveredChanged: {
+                    if (hovered) {
+                        yourchoice.source = "qrc:/paper.svg"
+                        yourchoice.opacity = 1
+                    } else {
+                        yourchoice.opacity = 0
                     }
                 }
             }
@@ -309,8 +317,13 @@ ApplicationWindow {
         Rectangle {
             id: yourrect
             color: "#ffffff"
-            width: parent.width / 4
+            width: parent.width / (myStates.state === "" ? 4 : 2)
             height: parent.height
+
+            Behavior on width {
+                NumberAnimation { duration: 500 }
+            }
+
             Image {
                 id: yourchoice
                 fillMode: Image.PreserveAspectFit
@@ -324,8 +337,13 @@ ApplicationWindow {
         Rectangle {
             id: myrect
             color: "#ffffff"
-            width: parent.width / 4
+            width: parent.width / (myStates.state === "" ? 4 : 2)
             height: parent.height
+
+            Behavior on width {
+                NumberAnimation { duration: 500 }
+            }
+
             Image {
                 id: mychoice
                 fillMode: Image.PreserveAspectFit
@@ -341,10 +359,14 @@ ApplicationWindow {
             } */
         Column {
             id: column2
-            width: parent.width / 4
+            width: myStates.state === "" ? parent.width / 4 : 0
             //opacity: myStates.state == "" ? 0.5 : 0.0
             anchors.bottom: parent.bottom
             anchors.top: parent.top
+
+            Behavior on width {
+                NumberAnimation { duration: 500 }
+            }
 
             Label {
                 id: computerlabel
@@ -352,6 +374,7 @@ ApplicationWindow {
                 horizontalAlignment: Text.AlignRight
                 anchors.left: parent.left
                 anchors.right: parent.right
+                opacity: myStates.state === "" ? 1.0 : 0.0
             }
 
             Image {
@@ -360,7 +383,7 @@ ApplicationWindow {
                 fillMode: Image.PreserveAspectFit
                 anchors.right: parent.right
                 anchors.left: parent.left
-                source: "rock.svg"
+                source: "qrc:/rock.svg"
                 mirror: true
                 opacity: myStates.state === "" ? 1.0 : 0.0
             }
@@ -370,7 +393,7 @@ ApplicationWindow {
                 anchors.right: parent.right
                 anchors.left: parent.left
                 fillMode: Image.PreserveAspectFit
-                source: "scissors.svg"
+                source: "qrc:/scissors.svg"
                 mirror: true
                 opacity: myStates.state === "" ? 1.0 : 0.0
             }
@@ -380,7 +403,7 @@ ApplicationWindow {
                 fillMode: Image.PreserveAspectFit
                 anchors.right: parent.right
                 anchors.left: parent.left
-                source: "paper.svg"
+                source: "qrc:/paper.svg"
                 mirror: true
                 opacity: myStates.state === "" ? 1.0 : 0.0
             }
@@ -454,7 +477,7 @@ ApplicationWindow {
 
                 PropertyChanges {
                     target: yourchoice
-                    source: "rock.svg"
+                    source: "qrc:/rock.svg"
                 }
 
                 StateChangeScript {
@@ -467,7 +490,7 @@ ApplicationWindow {
 
                 PropertyChanges {
                     target: yourchoice
-                    source: "scissors.svg"
+                    source: "qrc:/scissors.svg"
                 }
 
                 StateChangeScript {
@@ -480,7 +503,7 @@ ApplicationWindow {
 
                 PropertyChanges {
                     target: yourchoice
-                    source: "paper.svg"
+                    source: "qrc:/paper.svg"
                 }
 
                 StateChangeScript {
@@ -517,17 +540,17 @@ ApplicationWindow {
                 }
 
                 PropertyChanges {
-                    target: rockrect
+                    target: yourrock
                     opacity: 0.0
                 }
 
                 PropertyChanges {
-                    target: scissorsrect
+                    target: yourscissors
                     opacity: 0.0
                 }
 
                 PropertyChanges {
-                    target: paperrect
+                    target: yourpaper
                     opacity: 0.0
                 }
 
@@ -565,17 +588,17 @@ ApplicationWindow {
                 }
 
                 PropertyChanges {
-                    target: rockrect
+                    target: yourrock
                     opacity: 0.0
                 }
 
                 PropertyChanges {
-                    target: scissorsrect
+                    target: yourscissors
                     opacity: 0.0
                 }
 
                 PropertyChanges {
-                    target: paperrect
+                    target: yourpaper
                     opacity: 0.0
                 }
 
@@ -613,17 +636,17 @@ ApplicationWindow {
                 }
 
                 PropertyChanges {
-                    target: rockrect
+                    target: yourrock
                     opacity: 0.0
                 }
 
                 PropertyChanges {
-                    target: scissorsrect
+                    target: yourscissors
                     opacity: 0.0
                 }
 
                 PropertyChanges {
-                    target: paperrect
+                    target: yourpaper
                     opacity: 0.0
                 }
 
