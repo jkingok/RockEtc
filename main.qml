@@ -65,14 +65,14 @@ ApplicationWindow {
 
     function loadState() {
         var db = LocalStorage.openDatabaseSync("RockEtc", "1.0", "Statistics of RockEtc", 1024,
-                                  function (newdb) {
-                                      newdb.transaction(
-                                                  function(tx){
-                                                      tx.executeSql('CREATE TABLE IF NOT EXISTS Statistics(winCount NUMBER, lossCount NUMBER, drawCount NUMBER, gamesPlayed NUMBER)');
-                                                  })
-                                      newdb.changeVersion("", "1.0")
-                                  }
-                                      );
+                                               function (newdb) {
+                                                   newdb.transaction(
+                                                               function(tx){
+                                                                   tx.executeSql('CREATE TABLE IF NOT EXISTS Statistics(winCount NUMBER, lossCount NUMBER, drawCount NUMBER, gamesPlayed NUMBER)');
+                                                               })
+                                                   newdb.changeVersion("", "1.0")
+                                               }
+                                               );
         db.readTransaction(
                     function (tx) {
                         var rs = tx.executeSql("SELECT * FROM Statistics")
@@ -103,135 +103,135 @@ ApplicationWindow {
                         //if (rs.rows.item(0).rowCount > 0)
                         //    tx.executeSql('UPDATE TABLE Statistics SET winCount=?, lossCount=?, drawCount=?, gamesPlayed=?', [winCount, lossCount, drawCount, gamesPlayed])
                         //else
-                            tx.executeSql('INSERT OR REPLACE INTO Statistics VALUES(?, ?, ?, ?)', [winCount, lossCount, drawCount, gamesPlayed])
+                        tx.executeSql('INSERT OR REPLACE INTO Statistics VALUES(?, ?, ?, ?)', [winCount, lossCount, drawCount, gamesPlayed])
                     }
-                        )
+                    )
     }
 
     function chosen(number) {
-            var you = number;
-            var me = Math.floor(Math.random() * 3);
-            var newstate;
+        var you = number;
+        var me = Math.floor(Math.random() * 3);
+        var newstate;
+        switch (you) {
+        case 0:
+            yourchoice.source = "rock.svg"
+            break;
+        case 1:
+            yourchoice.source = "scissors.svg"
+            break;
+        case 2:
+            yourchoice.source = "paper.svg"
+            break;
+        }
+        switch (me) {
+        case 0:
+            mychoice.source = "rock.svg"
+            break;
+        case 1:
+            mychoice.source = "scissors.svg"
+            break;
+        case 2:
+            mychoice.source = "paper.svg"
+            break;
+        }
+        if (you === me) {
+            newstate = "Draw"
+            drawCount++;
             switch (you) {
             case 0:
-                yourchoice.source = "rock.svg"
+                status.text = "We both chose Rock. It's a draw."
                 break;
             case 1:
-                yourchoice.source = "scissors.svg"
+                status.text = "We both chose Scissors. It's a draw."
                 break;
             case 2:
-                yourchoice.source = "paper.svg"
+                status.text = "We both chose Paper. It's a draw."
                 break;
             }
-            switch (me) {
+        } else {
+            switch (you) {
             case 0:
-                mychoice.source = "rock.svg"
+                if (me == 1) {
+                    newstate = "Win"
+                    winCount++;
+                    status.text = "You chose Rock. I chose Scissors. You win."
+                } else {
+                    newstate = "Lose"
+                    lossCount++;
+                    status.text = "You chose Rock. I chose Paper. I win."
+                }
                 break;
             case 1:
-                mychoice.source = "scissors.svg"
+                if (me == 2) {
+                    newstate = "Win"
+                    winCount++;
+                    status.text = "You chose Scissors. I chose Paper. You win."
+                } else {
+                    newstate = "Lose"
+                    lossCount++;
+                    status.text = "You chose Scissors. I chose Rock. I win."
+                }
                 break;
             case 2:
-                mychoice.source = "paper.svg"
+                if (me == 0) {
+                    newstate = "Win"
+                    winCount++;
+                    status.text = "You chose Paper. I chose Rock. You win."
+                } else {
+                    newstate = "Lose"
+                    lossCount++;
+                    status.text = "You chose Paper. I chose Scissors. I win."
+                }
                 break;
             }
-            if (you === me) {
-                newstate = "Draw"
-                drawCount++;
-                switch (you) {
-                case 0:
-                    status.text = "We both chose Rock. It's a draw."
-                    break;
-                case 1:
-                    status.text = "We both chose Scissors. It's a draw."
-                    break;
-                case 2:
-                    status.text = "We both chose Paper. It's a draw."
-                    break;
-                }
-            } else {
-                switch (you) {
-                case 0:
-                    if (me == 1) {
-                        newstate = "Win"
-                        winCount++;
-                        status.text = "You chose Rock. I chose Scissors. You win."
-                    } else {
-                        newstate = "Lose"
-                        lossCount++;
-                        status.text = "You chose Rock. I chose Paper. I win."
-                    }
-                    break;
-                case 1:
-                    if (me == 2) {
-                        newstate = "Win"
-                        winCount++;
-                        status.text = "You chose Scissors. I chose Paper. You win."
-                    } else {
-                        newstate = "Lose"
-                        lossCount++;
-                        status.text = "You chose Scissors. I chose Rock. I win."
-                    }
-                    break;
-                case 2:
-                    if (me == 0) {
-                        newstate = "Win"
-                        winCount++;
-                        status.text = "You chose Paper. I chose Rock. You win."
-                    } else {
-                        newstate = "Lose"
-                        lossCount++;
-                        status.text = "You chose Paper. I chose Scissors. I win."
-                    }
-                    break;
-                }
-            }
-            //result.open();
-            gamesPlayed++;
-            return newstate;
         }
+        //result.open();
+        gamesPlayed++;
+        return newstate;
+    }
 
-        Timer {
-            id: reset
-            interval: 3000
-            running: false
-            repeat: false
-            onTriggered: myStates.state = ''
-        }
+    Timer {
+        id: reset
+        interval: 3000
+        running: false
+        repeat: false
+        onTriggered: myStates.state = ''
+    }
 
-        /* QueryDialog {
+    /* QueryDialog {
             id: result
             titleText: qsTr("Result")
             acceptButtonText: qsTr("Play again")
             onAccepted: myStates.state = ''
         } */
 
-        Row {
-            id: row1
+    Row {
+        id: row1
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: stats.bottom
+        Column {
+            id: column1
+            width: parent.width / 4
             anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: stats.bottom
-            Column {
-                id: column1
-                width: parent.width / 4
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                //opacity: myStates.state == "" ? 1.0 : 0.0
-                Label {
-                    id: playerlabel
-                    text: "Player"
-                    horizontalAlignment: Text.AlignLeft
-                }
+            anchors.bottom: parent.bottom
+            //opacity: myStates.state == "" ? 1.0 : 0.0
+            Label {
+                id: playerlabel
+                text: "Player"
+                horizontalAlignment: Text.AlignLeft
+            }
 
-                Rectangle {
-                    id: rockrect
-                    radius: 8
-                    color: "yellow"
-                    anchors.margins: 4
-                    anchors.right: parent.right
-                    anchors.left: parent.left
-                    height: parent.height / 3 - playerlabel.height
-                    opacity: 1.0
+            Rectangle {
+                id: rockrect
+                radius: 8
+                color: "yellow"
+                anchors.margins: 4
+                anchors.right: parent.right
+                anchors.left: parent.left
+                height: parent.height / 3 - playerlabel.height
+                opacity: 1.0
 
                 Image {
                     id: yourrock
@@ -247,17 +247,17 @@ ApplicationWindow {
                         onClicked: if (myStates.state === "") myStates.state = chosen(0)
                     }
                 }
-                }
+            }
 
-                Rectangle {
-                    id: scissorsrect
-                    radius: 8
-                    color: "yellow"
-                    anchors.margins: 4
-                    anchors.right: parent.right
-                    anchors.left: parent.left
-                    height: parent.height / 3 - playerlabel.height
-                    opacity: 1.0
+            Rectangle {
+                id: scissorsrect
+                radius: 8
+                color: "yellow"
+                anchors.margins: 4
+                anchors.right: parent.right
+                anchors.left: parent.left
+                height: parent.height / 3 - playerlabel.height
+                opacity: 1.0
 
                 Image {
                     id: yourscissors
@@ -273,17 +273,17 @@ ApplicationWindow {
                         onClicked: if (myStates.state === "") myStates.state = chosen(1)
                     }
                 }
-                }
+            }
 
-                Rectangle {
-                    id: paperrect
-                    radius: 8
-                    color: "yellow"
-                    anchors.margins: 4
-                    anchors.right: parent.right
-                    anchors.left: parent.left
-                    height: parent.height / 3 - playerlabel.height
-                    opacity: 1.0
+            Rectangle {
+                id: paperrect
+                radius: 8
+                color: "yellow"
+                anchors.margins: 4
+                anchors.right: parent.right
+                anchors.left: parent.left
+                height: parent.height / 3 - playerlabel.height
+                opacity: 1.0
 
                 Image {
                     id: yourpaper
@@ -299,156 +299,156 @@ ApplicationWindow {
                         onClicked: if (myStates.state === "") myStates.state = chosen(2)
                     }
                 }
-                }
             }
-            /* Column {
+        }
+        /* Column {
                 width: parent.width / 2
                 height: parent.height
 
                 Row { */
-                    Rectangle {
-                        id: yourrect
-                        color: "#ffffff"
-                        width: parent.width / 4
-                        height: parent.height
-                        Image {
-                            id: yourchoice
-                            fillMode: Image.PreserveAspectFit
-                            anchors.fill: parent
-                            opacity: 0.0
-                            Behavior on opacity {
-                                NumberAnimation { duration: 1000 }
-                            }
-                        }
-                    }
-                    Rectangle {
-                        id: myrect
-                        color: "#ffffff"
-                        width: parent.width / 4
-                        height: parent.height
-                        Image {
-                            id: mychoice
-                            fillMode: Image.PreserveAspectFit
-                            anchors.fill: parent
-                            opacity: 0.0
-                            mirror: true
-                            Behavior on opacity {
-                                NumberAnimation { duration: 1000 }
-                            }
-                        }
-                    }
-                /* }
+        Rectangle {
+            id: yourrect
+            color: "#ffffff"
+            width: parent.width / 4
+            height: parent.height
+            Image {
+                id: yourchoice
+                fillMode: Image.PreserveAspectFit
+                anchors.fill: parent
+                opacity: 0.0
+                Behavior on opacity {
+                    NumberAnimation { duration: 1000 }
+                }
+            }
+        }
+        Rectangle {
+            id: myrect
+            color: "#ffffff"
+            width: parent.width / 4
+            height: parent.height
+            Image {
+                id: mychoice
+                fillMode: Image.PreserveAspectFit
+                anchors.fill: parent
+                opacity: 0.0
+                mirror: true
+                Behavior on opacity {
+                    NumberAnimation { duration: 1000 }
+                }
+            }
+        }
+        /* }
             } */
-            Column {
-                id: column2
-                width: parent.width / 4
-                //opacity: myStates.state == "" ? 0.5 : 0.0
-                anchors.bottom: parent.bottom
-                anchors.top: parent.top
-
-                Label {
-                    id: computerlabel
-                    text: "Computer"
-                    horizontalAlignment: Text.AlignRight
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                }
-
-                Image {
-                    id: myrock
-                    height: parent.height / 3 - computerlabel.height
-                    fillMode: Image.PreserveAspectFit
-                    anchors.right: parent.right
-                    anchors.left: parent.left
-                    source: "rock.svg"
-                    mirror: true
-                    opacity: myStates.state === "" ? 1.0 : 0.0
-                }
-                Image {
-                    id: myscissors
-                    height: parent.height / 3 - computerlabel.height
-                    anchors.right: parent.right
-                    anchors.left: parent.left
-                    fillMode: Image.PreserveAspectFit
-                    source: "scissors.svg"
-                    mirror: true
-                    opacity: myStates.state === "" ? 1.0 : 0.0
-                }
-                Image {
-                    id: mypaper
-                    height: parent.height / 3 - computerlabel.height
-                    fillMode: Image.PreserveAspectFit
-                    anchors.right: parent.right
-                    anchors.left: parent.left
-                    source: "paper.svg"
-                    mirror: true
-                    opacity: myStates.state === "" ? 1.0 : 0.0
-                }
-            }
-        }
-
-        Row {
-            id: stats
-            anchors.left: parent.left
-            anchors.right: parent.right
+        Column {
+            id: column2
+            width: parent.width / 4
+            //opacity: myStates.state == "" ? 0.5 : 0.0
             anchors.bottom: parent.bottom
-            Rectangle {
-                id: winsbox
-                color: "#66ff66"
-                width: gamesPlayed == 0 ? parent.width / 3 : parent.width * (winCount / gamesPlayed)
-                height: Math.max(winstext.height, Math.max(drawstext.height, lossestext.height))
-                Label {
-                    id: winstext
-                    text: winCount + " win" + (winCount != 1 ? "s" : "")
-                    horizontalAlignment: Text.AlignLeft
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    visible: gamesPlayed == 0 || winCount > 0
-                }
-                Behavior on width {
-                    NumberAnimation { duration: 1000 }
-                }
+            anchors.top: parent.top
+
+            Label {
+                id: computerlabel
+                text: "Computer"
+                horizontalAlignment: Text.AlignRight
+                anchors.left: parent.left
+                anchors.right: parent.right
             }
-            Rectangle {
-                id: drawsbox
-                color: "#6666ff"
-                width: gamesPlayed == 0 ? parent.width / 3 : parent.width * (drawCount / gamesPlayed)
-                height: Math.max(drawstext.height, Math.max(winstext.height, lossestext.height))
-                Label {
-                    id: drawstext
-                    text: drawCount + " draw" + (drawCount != 1 ? "s" : "")
-                    horizontalAlignment: Text.AlignHCenter
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    visible: gamesPlayed == 0 || drawCount > 0
-                }
-                Behavior on width {
-                    NumberAnimation { duration: 1000 }
-                }
+
+            Image {
+                id: myrock
+                height: parent.height / 3 - computerlabel.height
+                fillMode: Image.PreserveAspectFit
+                anchors.right: parent.right
+                anchors.left: parent.left
+                source: "rock.svg"
+                mirror: true
+                opacity: myStates.state === "" ? 1.0 : 0.0
             }
-            Rectangle {
-                id: lossesbox
-                color: "#ff6666"
-                width: gamesPlayed == 0 ? parent.width / 3 : parent.width * (lossCount / gamesPlayed)
-                height: Math.max(lossestext.height, Math.max(winstext.height, drawstext.height))
-                Label {
-                    id: lossestext
-                    text: lossCount + " loss" + (lossCount != 1 ? "es" : "")
-                    horizontalAlignment: Text.AlignRight
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    visible: gamesPlayed == 0 || lossCount > 0
-                }
-                Behavior on width {
-                    NumberAnimation { duration: 1000 }
-                }
+            Image {
+                id: myscissors
+                height: parent.height / 3 - computerlabel.height
+                anchors.right: parent.right
+                anchors.left: parent.left
+                fillMode: Image.PreserveAspectFit
+                source: "scissors.svg"
+                mirror: true
+                opacity: myStates.state === "" ? 1.0 : 0.0
+            }
+            Image {
+                id: mypaper
+                height: parent.height / 3 - computerlabel.height
+                fillMode: Image.PreserveAspectFit
+                anchors.right: parent.right
+                anchors.left: parent.left
+                source: "paper.svg"
+                mirror: true
+                opacity: myStates.state === "" ? 1.0 : 0.0
             }
         }
+    }
 
-        StateGroup {
-            id: myStates
+    Row {
+        id: stats
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        Rectangle {
+            id: winsbox
+            color: "#66ff66"
+            width: gamesPlayed == 0 ? parent.width / 3 : parent.width * (winCount / gamesPlayed)
+            height: Math.max(winstext.height, Math.max(drawstext.height, lossestext.height))
+            Label {
+                id: winstext
+                text: winCount + " win" + (winCount != 1 ? "s" : "")
+                horizontalAlignment: Text.AlignLeft
+                anchors.left: parent.left
+                anchors.right: parent.right
+                visible: gamesPlayed == 0 || winCount > 0
+            }
+            Behavior on width {
+                NumberAnimation { duration: 1000 }
+            }
+        }
+        Rectangle {
+            id: drawsbox
+            color: "#6666ff"
+            width: gamesPlayed == 0 ? parent.width / 3 : parent.width * (drawCount / gamesPlayed)
+            height: Math.max(drawstext.height, Math.max(winstext.height, lossestext.height))
+            Label {
+                id: drawstext
+                text: drawCount + " draw" + (drawCount != 1 ? "s" : "")
+                horizontalAlignment: Text.AlignHCenter
+                anchors.left: parent.left
+                anchors.right: parent.right
+                visible: gamesPlayed == 0 || drawCount > 0
+            }
+            Behavior on width {
+                NumberAnimation { duration: 1000 }
+            }
+        }
+        Rectangle {
+            id: lossesbox
+            color: "#ff6666"
+            width: gamesPlayed == 0 ? parent.width / 3 : parent.width * (lossCount / gamesPlayed)
+            height: Math.max(lossestext.height, Math.max(winstext.height, drawstext.height))
+            Label {
+                id: lossestext
+                text: lossCount + " loss" + (lossCount != 1 ? "es" : "")
+                horizontalAlignment: Text.AlignRight
+                anchors.left: parent.left
+                anchors.right: parent.right
+                visible: gamesPlayed == 0 || lossCount > 0
+            }
+            Behavior on width {
+                NumberAnimation { duration: 1000 }
+            }
+        }
+    }
 
-            states: [
+    StateGroup {
+        id: myStates
+
+        states: [
             State {
                 name: "YouRock"
 
@@ -532,7 +532,7 @@ ApplicationWindow {
                 }
 
                 StateChangeScript {
-                   script: reset.start()
+                    script: reset.start()
                 }
             },
 
@@ -582,9 +582,9 @@ ApplicationWindow {
                 StateChangeScript {
                     script: reset.start()
                 }
-           },
+            },
 
-           State {
+            State {
                 name: "Draw"
 
                 PropertyChanges {
@@ -648,10 +648,10 @@ ApplicationWindow {
             }
 
         ]
-        }
+    }
 
 
-        /* Column {
+    /* Column {
             id: column1
             anchors.fill: parent
 
