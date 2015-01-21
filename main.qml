@@ -1,5 +1,5 @@
-import QtQuick 2.2
-import QtQuick.Controls 1.2
+import QtQuick 2.3
+import QtQuick.Controls 1.3
 import QtQuick.Layouts 1.1
 import QtQuick.LocalStorage 2.0
 
@@ -9,7 +9,8 @@ ApplicationWindow {
     height: 480
     title: qsTr("RockEtc")
 
-    menuBar: MenuBar {
+    // Menu bars don't work well in Windows Runtime
+    property var possibleMenuBar: MenuBar {
         Menu {
             title: qsTr("App")
             MenuItem {
@@ -83,6 +84,10 @@ ApplicationWindow {
                         }
                     }
                     )
+
+        // We also disable the menu bar on winrt
+        if (Qt.platform.os !== "winrt")
+            menuBar = possibleMenuBar;
     }
 
     Component.onCompleted: loadState()
