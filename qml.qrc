@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>paper.svg</file>
+        <file>rock.svg</file>
+        <file>scissors.svg</file>
+    </qresource>
+</RCC>
